@@ -9,9 +9,9 @@ upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 number = "0123456789"
 loIO01 = "loIO01"
 symbol = "!@#$%^&*_+?-="
-symbolAmbiguous = "{}[]()/\'\"`~,;:.<>"
+symbolAmbiguous = "{}[]()/\\`~,;:.<>"
 
-def generatePassword(alphabet, length=16, numPasswords=1, annoyingReqs = False):
+def generatePassword(alphabet, length, numPasswords=1, annoyingReqs = False):
     for _ in range(numPasswords):
         password = "".join([random.choice(alphabet) for _ in range(length)])
         if annoyingReqs:
@@ -32,6 +32,8 @@ excludeStr = '            {} (include {}, excluded by default)'
 numArg =     '            {} ({} by default)'
 
 def __main__():
+    kwargs = {}
+    kwargs['length']=16
     if not "--justpasswords" in sys.argv:
         print("Welcome to the secure password generator!")
     if "--help" in sys.argv:
@@ -53,7 +55,6 @@ def __main__():
     if not "--justpasswords" in sys.argv:
         print("  (For help, try: ./secure-password-generator.py --help)\n")
     args = [lower, upper, number, symbol, symbolAmbiguous]
-    kwargs = {}
     lengthRE = re.compile("--length=(\d+)")
     numPasswordsRE = re.compile("--numpasswords=(\d+)")
     if any([lengthRE.match(arg) for arg in sys.argv]):
