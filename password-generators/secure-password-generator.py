@@ -4,35 +4,34 @@
   secure-password-generator.py [options]
 
 Options:
-  -h --help                show this help message and exit
-  --version                show version and exit
-  --nolower                Exclude lowercase letters, included by default
-  --noupper                Exclude uppercase letters, included by default
-  --nonumber               Exclude numbers, included by default
-  --nosymbol               Exclude all symbols, included by default
-  --nosymbolambi           Exclude "{}[]()/\`~,;:.<>", included by default
-  --yesalphaambi           Include "loIO01", excluded by default
-  --length LENGTH          Password length [default: 16]
-  --numpasswords NUM       Number of passwords [default: 1]
-  --annoyingreqs           1+ uppercase, lowercase, number and symbol
+  -h --help            show this help message and exit
+  --nolower            exclude lowercase letters
+  --noupper            exclude uppercase letters
+  --nonumber           exclude numbers
+  --nosymbol           exclude all symbols
+  --nosymbolambi       exclude '{}[]()~,;:.<>'
+  --yesalphaambi       include 'loIO01' (excluded by default)
+  --length LENGTH      password length [default: 16]
+  --numpasswords NUM   number of passwords [default: 1]
+  --annoyingreqs       add 1+ uppercase, lowercase, number, & symbol to password
 """
 import random
 from docopt import docopt
 
-arguments = docopt(__doc__, version='2.0')
+arguments = docopt(__doc__)
     
 lower = 'abcdefghijklmnopqrstuvwxyz'
 upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 number = '0123456789'
 loIO01 = 'loIO01'
 symbol = '!@#$%^&*_+?-='
-symbolAmbiguous = '{}[]()/\\~,;:.<>'
+ambiguous_symbols = '{}[]()~,;:.<>'
 
 def exclude(characters, alphabet):
     return "".join(list(set(alphabet) - set(characters)))
 
 def get_alphabet(arguments):
-    alphabet = ''.join([lower, upper, number, symbol, symbolAmbiguous])
+    alphabet = ''.join([lower, upper, number, symbol, ambiguous_symbols])
     if not arguments['--yesalphaambi']:
         alphabet = exclude(loIO01, alphabet)
     if arguments['--nolower']:
@@ -41,10 +40,10 @@ def get_alphabet(arguments):
         alphabet = exclude(upper, alphabet)
     if arguments['--nonumber']:
         alphabet = exclude(number, alphabet)
-    if arguments['--nosymbolambi'] and symbolAmbiguous in args:
-        alphabet = exclude(symbolAmbiguous, alphabet)
+    if arguments['--nosymbolambi']:
+        alphabet = exclude(ambiguous_symbols, alphabet)
     if arguments['--nosymbol']:
-        alphabet = exclude(symbolAmbiguous, alphabet)
+        alphabet = exclude(ambiguous_symbols, alphabet)
         alphabet = exclude(symbol, alphabet)
     return alphabet
 
@@ -67,7 +66,6 @@ def generate_passwords(arguments):
         print(password)
 
 def __main__():
-    args = [lower, upper, number, symbol, symbolAmbiguous]
     generate_passwords(arguments)
 
 __main__()

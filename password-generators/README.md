@@ -2,13 +2,13 @@ Two password generators written in Python3.
 
 (1.) Secure Password Generator:
 
-This offline script attempts to replicate the functionality of the password generator at (http://passwordsgenerator.net/). I've always felt paranoid about using a website for password-generation, but I have used this website in the past when I needed a password. This script is for the paranoid. It eliminates the need to trust that a website is not storing your password:
+This offline script attempts to replicate the functionality of the password generator at (http://passwordsgenerator.net/). I use it to generate secure passwords locally, without having to trust any website or network!
 
-![alt text](https://raw.githubusercontent.com/jamesshapiro/python-scripts/master/assets/images/secure-password-welcome-prompt.png)
+![alt text](https://raw.githubusercontent.com/jamesshapiro/python-scripts/master/assets/images/secure-password-simple-use.png)
 
 ![alt text](https://raw.githubusercontent.com/jamesshapiro/python-scripts/master/assets/images/secure-password-use-case.png)
 
-You can exclude symbols, numbers, lowercase letters, and/or uppercase letters from your password using flags. Similar letters/numbers (i.e. "lI1oO0") are excluded by default but can be included with the "--yesalphaambi" flag. secure-password-generator.py also has some additional functionality (i.e. the ability to require one uppercase, one lowercase, one number, and one symbol, for annoying websites that require that):
+You can exclude symbols, numbers, lowercase letters, and/or uppercase letters from your passwords using flags. Similar letters/numbers (i.e. "lI1oO0") are excluded by default but can be included with the "--yesalphaambi" flag. secure-password-generator.py also has some additional functionality (i.e. the ability to require one uppercase, one lowercase, one number, and one symbol, for websites that require that):
 
 ![alt text](https://raw.githubusercontent.com/jamesshapiro/python-scripts/master/assets/images/secure-password-help.png)
 
