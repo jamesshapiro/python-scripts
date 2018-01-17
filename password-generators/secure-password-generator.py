@@ -65,7 +65,5 @@ def generate_passwords(arguments):
             password = ''.join(password_list)
         print(password)
 
-def __main__():
+if __name__ == "__main__":
     generate_passwords(arguments)
-
-__main__()
