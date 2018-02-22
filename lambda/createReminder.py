@@ -23,6 +23,7 @@ def unauthorizedRequest():
                 'body': json.dumps(responseBody)}
     return response
 
+"""
 def convertJamesDateToISO8601(dato):
     parts = dato.split("-")
     if len(parts) != 4:
@@ -53,6 +54,7 @@ def convertJamesDateToISO8601(dato):
 def convertISO8601ToUnixTimestamp(iso8601):
     parsedDate = dateutil.parser.parse(iso8601)
     return int(time.mktime(parsedDate.timetuple())) + (8 * 3600)
+"""
 
 def lambda_handler(event, context):
     responseCode = 200
@@ -72,6 +74,7 @@ def lambda_handler(event, context):
     
     message = "Remind James of the following: \"" + reminder_content + "\" at " + time_content + ", Cali time. "
     message += ". time content = {}".format(time_content)
+    """
     try:
         iso8601Time = convertJamesDateToISO8601(time_content)
         message += '. iso8601Time = {}'.format(iso8601Time)
@@ -79,6 +82,8 @@ def lambda_handler(event, context):
         return badRequest(bad_time_syntax)
     
     unixTime = convertISO8601ToUnixTimestamp(iso8601Time)
+    """
+    unixTime = int(body['time'])
     
     currUnixTime = int(str(time.time()).split(".")[0])
     if currUnixTime > unixTime:

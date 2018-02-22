@@ -1,23 +1,31 @@
 #!/usr/bin/env python3 -tt
 
-import os
+import requests
+import json
 import sys
+import maya
 
-if len(sys.argv) != 3:
+if len(sys.argv) != 2:
     print('Usage: remindme "do laundry" 12-18-2016-12:09:53:am')
     sys.exit(0)
 
-thingToRemember = sys.argv[1]
-jamesDate = sys.argv[2]
-password = '[REDACTED]'
+with open('/Users/jamesshapiro/scripts/lambda_password', 'r') as f:
+    password = f.read().replace('\n', '')
 
-command = "curl -v -X POST "
-command += "  'https://[REDACTED].execute-api.us-east-1.amazonaws.com/test/S' "
-command += "  -H 'content-type: application/json' "
-command += "  -H 'day: Friday' "
-command += "  -H 'x-amz-docs-region: us-west-2' "
-command += "  -d '{\"reminder\":\"" + thingToRemember + "\", "
-command += "\"password\": \"" + password + "\","
-command += "\"time\": \"" + jamesDate + "\"}'"
+with open('/Users/jamesshapiro/scripts/lambda_link', 'r') as f:
+    url = f.read().replace('\n', '')
 
-os.system(command)
+reminder = sys.argv[1]
+now = maya.now()
+later = now.add(minutes=0)
+later_int = int(later._epoch)
+
+payload = {'reminder': reminder,
+           'password': password,
+           'time': str(later_int)}
+
+r = requests.post(url, data=json.dumps(payload))
+
+print(r.text)
+to_json = json.loads(r.text)
+print(to_json['message'])
