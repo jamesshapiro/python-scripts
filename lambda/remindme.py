@@ -6,48 +6,86 @@
 Options:
   -h --help           show this HELP message and exit
   --repeat FREQUENCY  repeat reminder with frequency
-  --until STOP        repeat until, e.g. 1-1-2020-9:00:00:am
+  --until STOP        repeat until, e.g. 5-14-2020-9:15am [default: '1-1-2038-12:00am']
 """
 
 #now.datetime(to_timezone='US/Pacific', naive=True)
-#print('Usage: remindme "do laundry" 12-18-2016-12:09:53:am')
+#print('Usage: remindme "do laundry" 12-18-2016-12:09:am')
 
-import requests
 import json
-import sys
 import maya
+import re
+import requests
+import sys
 from docopt import docopt
 
 """
 today, tomorrow, M-Sun, next week, tonight
-
 """
+
+def time_of_day(time):
+    # 8am, 8pm, 12am, 8:30am, 8:30pm, 12:30pm
+    pattern = re.compile('(\d\d?)(:(\d\d))?(am|pm)')
+    if pattern.match(time):
+        hour = int(pattern.match(time).groups()[0])
+        ampm = pattern.match(time).groups()[3]
+        minute = pattern.match(time).groups()[2]
+        if minute == None:
+            minute = 0
+        minute = int(minute)
+    else:
+        print('INVALID TIME FORMAT')
+        print('try: 8am, 8:30am, 12pm, 12:17pm')
+        sys.exit(0)
+    if hour == 12:
+        hour = 0
+    if ampm == 'pm':
+        hour += 12
+    return (hour, minute)
+
+def james_date_to_epoch(james_date):
+    parts = james_date.split('-')
+    if len(parts) != 4:
+        raise ValueError(bad_time_syntax)
+    month = parts[0]
+    day = parts[1]
+    year = parts[2]
+    hour, minute = time_of_day(parts[3])
+    maya_format = '{}-{}-{} {}:{}'.format(year, month, day, hour, minute)
+    return maya.when(maya_format,timezone=timezone)
+
 def get_midnight(timezone):
-    print(timezone)
     now = maya.now()
     local_now = now.datetime(to_timezone=timezone, naive=True)
     year = local_now.year
     month = local_now.month
     day = local_now.day
     midnight = maya.when('-'.join(map(str,[year, month, day])), timezone=timezone)
-    return int(midnight._epoch)
+    return midnight
 
 def upload_reminder(time, reminder, password, url):
     payload = {'reminder': reminder,
                'password': password,
-               'time': str(time)}
-    print(url, type(url))
-    print(time, type(time))
-    print(reminder, type(reminder))
-    print(password, type(password))
+               'time': time}
     r = requests.post(url, data=json.dumps(payload))
-    print(r.text)
     to_json = json.loads(r.text)
-#    print(to_json['message'])
+    print(to_json['message'])
 
+#TODO: add Sunday, Mon-Fri, Sat, next week, next month    
 def parse_time(time, midnight):
+    if time[0].endswith('am') or time[0].endswith('pm'):
+        return james_date_to_epoch(time[0])
+    if time[-1].endswith('am') or time[-1].endswith('pm'):
+        hours, minutes = time_of_day(time[-1])
+    if time == ['tonight']:
+        return midnight.add(hours=20)
+    if time == ['tomorrow', 'morning']:
+        return midnight.add(days=1, hours=8)
     if time[0] == 'today':
-        print('hooray!')
+        return midnight.add(hours=hours, minutes=minutes)
+    if time[0] == 'tomorrow':
+        return midnight.add(days=1, hours=hours, minutes=minutes)
+    return midnight
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='Reminders 0.1')
@@ -58,14 +96,14 @@ if __name__ == '__main__':
     url = d['url']
     timezone = d['timezone']
     reminder = arguments['REMINDER']
-    midnight_timestamp = get_midnight(timezone)
-    midnight = maya.when(str(midnight_timestamp), timezone=timezone)
-    #time = parse_time(arguments['TIME'])
-    time = midnight.add(hours=21,minutes=55)
-    time = int(time._epoch)
-    #    print(get_midnight(timezone))
-    #    sys.exit(0)
+    midnight = get_midnight(timezone)
+    time = parse_time(arguments['TIME'], midnight)
+    time = str(int(time._epoch))
+    #TODO: finish implementing repeating reminders
     upload_reminder(time, reminder, password, url)
+    if arguments['--repeat']:
+        stop_date = james_date_to_epoch(arguments['--until'])
+        print(int(stop_date._epoch))
 
 """
 now = maya.now()
@@ -74,34 +112,3 @@ later_int = int(later._epoch)
 """
 
 #when = maya.when('2018-02-01', timezone='US/Pacific')
-
-def convertJamesDateToISO8601(dato):
-    parts = dato.split("-")
-    if len(parts) != 4:
-        raise ValueError(bad_time_syntax)
-    month = parts[0]
-    day = parts[1]
-    year = parts[2]
-    time = parts[3]
-    timeParts = time.split(":")
-    if len(timeParts) != 4:
-        raise ValueError(bad_time_syntax)
-    hour = int(timeParts[0])
-    minute = int(timeParts[1])
-    second = int(timeParts[2])
-    if hour < 1 or hour > 12 or minute < 0 or minute > 59 or second < 0 or second > 59:
-        raise ValueError(bad_time_syntax)
-    amOrPm = timeParts[3]
-    if amOrPm != 'am' and amOrPm != 'pm':
-        raise ValueError(bad_time_syntax)
-    if hour == 12 and amOrPm == "am":
-        hour = 0
-    elif hour == 12 and amOrPm == "pm":
-        hour = 12
-    elif amOrPm == "pm":
-        hour = hour + 12
-    return year + "-" + month + "-" + day + "T" + str(hour) + ":" + str(minute) + ":" + str(second) + "-00:00"
-
-def convertISO8601ToUnixTimestamp(iso8601):
-    parsedDate = dateutil.parser.parse(iso8601)
-    return int(time.mktime(parsedDate.timetuple())) + (8 * 3600)
