@@ -6,6 +6,12 @@
 Options:
   -h --help           show this HELP message and exit
   --repeat FREQUENCY  repeat reminder with frequency
+  --minutes MINUTES   minutes for custom repeat increment
+  --hours HOURS       hours for custom repeat increment
+  --days DAYS         days for custom repeat increment
+  --weeks WEEKS       weeks for custom repeat increment
+  --months MONTHS     months for custom repeat increment
+  --years YEARS       years for custom repeat increment
   --until STOP        repeat until, e.g. 5-14-2020-9:15am [default: '1-1-2038-12:00am']
 """
 
@@ -71,15 +77,17 @@ def get_midnight(timezone):
     midnight = maya.when('-'.join(map(str,[year, month, day])), timezone=timezone)
     return midnight
 
-def upload_reminder(time, reminder, password, url):
+def upload_reminder(time, reminder, password, url, readable):
     payload = {'reminder': reminder,
                'password': password,
-               'time': time}
+               'time': time,
+               'readable_reminder_time': readable}
     r = requests.post(url, data=json.dumps(payload))
     to_json = json.loads(r.text)
     print(to_json['message'])
 
 def get_weekday_index(weekday):
+    weekday = weekday.lower()
     if weekday in monday:
         return 0
     elif weekday in tuesday:
@@ -125,9 +133,49 @@ def parse_time(time, midnight):
         return midnight.add(days=days, hours=hours, minutes=minutes)
     return midnight
 
+def readable_timestamp(time):
+    return maya.when(str(time),timezone=timezone).datetime(to_timezone=timezone)
+
+#inc = {'months':18}
+# maya.now().add(**inc).datetime(to_timezone='US/Pacific')
+
+
+def get_increment():
+    if not arguments['--repeat']:
+        print('expected repeats flag')
+        sys.exit(0)
+    repeat_option = arguments['--repeat']
+    if repeat_option == 'weekly':
+        return {'days': 7}
+    elif repeat_option == 'monthly':
+        return {'months': 1}
+    elif repeat_option in ['fortnightly', 'biweekly']:
+        return {'days': 14}
+    elif repeat_option == 'quarterly':
+        return {'months': 3}
+    elif repeat_option == 'biannually':
+        return {'months': 6}
+    elif repeat_option in ['yearly','annually']:
+        return {'years': 1}
+    elif repeat_option == 'custom':
+        custom_flags = ['--minutes','--hours','--days','--weeks','--months','--years']
+        return {flag[2:]:int(arguments[flag]) for flag in custom_flags if arguments[flag]}
+    else:
+        print('invalid repeat flag option')
+        sys.exit(0)
+
+def repeat_reminder(time, reminder):
+    stop_date = james_date_to_epoch(arguments['--until'])
+    stop_time = int(stop_date._epoch)
+    print('stop date: ' + str(readable_timestamp(stop_time)))
+    increment = get_increment()
+    while int(time.add(**increment)._epoch) < stop_time:
+        time = time.add(**increment)
+        print_time = int(time._epoch)
+        upload_reminder(print_time, reminder, password, url, str(readable_timestamp(print_time)))
+
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='Reminders 0.1')
-    #print(arguments)
     with open('/Users/jamesshapiro/scripts/lambda_creds', 'r') as json_data:
         d = json.load(json_data)
     password = d['password']
@@ -136,18 +184,8 @@ if __name__ == '__main__':
     reminder = arguments['REMINDER']
     midnight = get_midnight(timezone)
     time = parse_time(arguments['TIME'], midnight)
-    time = str(int(time._epoch))
-    print(time)
-    #TODO: finish implementing repeating reminders
-    upload_reminder(time, reminder, password, url)
+    print_time = int(time._epoch)
+    upload_reminder(print_time, reminder, password, url, str(readable_timestamp(print_time)))
     if arguments['--repeat']:
-        stop_date = james_date_to_epoch(arguments['--until'])
-        #print(int(stop_date._epoch))
+        repeat_reminder(time, reminder)
 
-"""
-now = maya.now()
-later = now.add(minutes=0)
-later_int = int(later._epoch)
-"""
-
-#when = maya.when('2018-02-01', timezone='US/Pacific')
