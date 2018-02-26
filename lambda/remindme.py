@@ -16,7 +16,6 @@ Options:
 """
 
 #print('Usage: remindme "do laundry" 12-18-2016-12:09am')
-
 import datetime
 import json
 import maya
@@ -135,10 +134,6 @@ def parse_time(time, midnight):
 
 def readable_timestamp(time):
     return maya.when(str(time),timezone=timezone).datetime(to_timezone=timezone)
-
-#inc = {'months':18}
-# maya.now().add(**inc).datetime(to_timezone='US/Pacific')
-
 
 def get_increment():
     if not arguments['--repeat']:
