@@ -140,7 +140,9 @@ def get_increment():
         print('expected repeats flag')
         sys.exit(0)
     repeat_option = arguments['--repeat']
-    if repeat_option == 'weekly':
+    if repeat_option == 'daily':
+        return {'days': 1}
+    elif repeat_option == 'weekly':
         return {'days': 7}
     elif repeat_option == 'monthly':
         return {'months': 1}
