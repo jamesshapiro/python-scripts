@@ -7,7 +7,6 @@ Options:
   -h --help           show this HELP message and exit
 """
 
-#print('Usage: daysto 01-01-2100')
 import datetime
 import json
 import maya
@@ -18,6 +17,7 @@ from docopt import docopt
 def james_date_to_epoch(james_date):
     parts = james_date.split('-')
     if len(parts) != 4:
+        print('Usage: daysto 01-01-2100 (also works with past dates)')
         raise ValueError("Bad Time Syntax!")
     month = parts[0]
     day = parts[1]
@@ -47,6 +47,8 @@ if __name__ == '__main__':
     while midnight._epoch < target_midnight._epoch:
         midnight = midnight.add(days=1)
         total += 1
+    while midnight._epoch > target_midnight._epoch:
+        midnight = midnight.add(days=-1)
+        total -= 1
     print(total)
-#    while midnight.epoch > target_midnight._epoch:
 
