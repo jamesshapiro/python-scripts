@@ -5,7 +5,7 @@ import time
 import boto3
 
 bad_time_syntax = 'Bad time syntax. Usage: "reminder": "do laundry", "time": "12-18-2016-12:09am"'
-password = 'j,7/RE6.TU*b7AP:aMX.J^mtEKMSw'
+password = '[REDACTED]'
 
 def badRequest(message):
     responseCode = 400
