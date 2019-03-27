@@ -3,9 +3,13 @@ import sys
 import dateutil.parser
 import time
 import boto3
+import os
+from base64 import b64decode
 
 bad_time_syntax = 'Bad time syntax. Usage: "reminder": "do laundry", "time": "12-18-2016-12:09am"'
-password = '[REDACTED]'
+
+ENCRYPTED = os.environ['ciphertext_password']
+password = boto3.client('kms').decrypt(CiphertextBlob=b64decode(ENCRYPTED))['Plaintext'].decode("utf-8")
 
 def badRequest(message):
     responseCode = 400
