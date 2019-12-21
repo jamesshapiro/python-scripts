@@ -4,7 +4,7 @@ import sys
 
 if __name__ == '__main__':
     now = datetime.datetime.now()
-    cal = calendar.TextCalendar()
+    cal = calendar.TextCalendar(firstweekday=6)
     if len(sys.argv) == 2:
         num_months = int(sys.argv[1])
     else:
