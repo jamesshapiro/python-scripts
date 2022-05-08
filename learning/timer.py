@@ -9,10 +9,11 @@ def get_todays_date():
     now = datetime.now()
     return f'{now.month:02d}-{now.day:02d}-{now.year}'
 
-def get_display_time(total_seconds, prefix):
-    mins = total_seconds // 60
-    secs = total_seconds % 60
-    return f'{prefix}:  {mins}m{secs}'
+def get_display_time(seconds, prefix):
+    mins = seconds // 60
+    secs = seconds % 60
+    spaces = ' ' * (6 - len(f'{prefix}:'))
+    return f'{prefix}:{spaces}{mins}m{secs}'
 
 lines = []
 while(True):
@@ -20,8 +21,15 @@ while(True):
     if time_input == '':
         break
     min_secs = time_input.split('m')
-    total_seconds += int(min_secs[1].replace('s',''))
-    total_seconds += int(min_secs[0])*60
+    seconds = int(min_secs[1].replace('s',''))
+    minutes_in_seconds = int(min_secs[0])*60
+    total_seconds += seconds
+    total_seconds += minutes_in_seconds
+    vid_seconds = 0
+    vid_seconds += seconds
+    vid_seconds += minutes_in_seconds
+    vid_time = get_display_time(vid_seconds, 'time')
+    lines.append(vid_time)
     raw_time = get_display_time(total_seconds, 'raw')
     print(raw_time)
     lines.append(raw_time)
@@ -36,7 +44,7 @@ while(True):
         break
 
 with open(outfile, 'w') as f:
-    f.write(get_todays_date + '\n')
+    f.write(get_todays_date() + '\n')
     f.write(separator + '\n')
     f.write('>\n')
     f.write('\n'.join(lines))
