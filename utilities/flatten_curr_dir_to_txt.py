@@ -16,7 +16,7 @@ MAX_FILE_SIZE = 800_000  # ~0.8 MB
 DEFAULT_IGNORED_DIRS = {
     ".git", ".hg", ".svn", ".DS_Store", "__pycache__", ".venv", "venv", "env",
     "node_modules", "bower_components", ".pnpm-store", ".yarn", ".yarn/cache",
-    ".vscode", ".idea", ".terraform", ".next", ".nuxt", ".expo",
+    ".vscode", ".idea", ".terraform", ".terragrunt-cache", ".next", ".nuxt", ".expo",
     "dist", "build", "out", "coverage", "target", "Pods", "Carthage", "DerivedData",
     ".pytest_cache", ".mypy_cache", ".gradle", ".cache", ".parcel-cache",
 }
@@ -28,7 +28,8 @@ INCLUDE_EXTS = {
     ".cs", ".scala", ".m", ".mm", ".pl", ".pm", ".lua", ".php", ".r", ".jl",
     ".sh", ".bash", ".zsh", ".ps1", ".cmd", ".bat", ".fish", ".awk",
     ".html", ".htm", ".css", ".scss", ".sass", ".less",
-    ".json", ".jsonc", ".yaml", ".yml", ".toml", ".ini", ".conf", ".cfg",
+    ".json", ".jsonc", ".yaml", ".yml", ".toml", ".ini", ".conf", ".cfg", ".hcl",
+    ".tf", ".tfvars", ".tfstate", ".tfplan",
     ".env.example", ".dockerignore", ".editorconfig",
     ".md", ".rst", ".tex", ".graphql", ".gql",
     ".gradle", ".gradle.kts", ".properties",
@@ -49,6 +50,10 @@ EXCLUDE_EXTS = {
     ".o", ".a", ".so", ".dylib", ".dll", ".bin", ".exe", ".class", ".pyc", ".pyo",
     ".wasm",
     "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "poetry.lock", "Pipfile.lock",
+}
+
+EXCLUDE_FILES = {
+    ".terraform.lock.hcl",
 }
 
 def read_gitignore_patterns(root):
@@ -85,6 +90,10 @@ def is_included_file(path, gitignore_patterns):
     name = path.name
 
     if path_matches_any(rel, gitignore_patterns):
+        return False
+
+    # Check if file is in the exclude list
+    if name in EXCLUDE_FILES:
         return False
 
     lower_name = name.lower()
