@@ -19,6 +19,7 @@ DEFAULT_IGNORED_DIRS = {
     ".vscode", ".idea", ".terraform", ".terragrunt-cache", ".next", ".nuxt", ".expo",
     "dist", "build", "out", "coverage", "target", "Pods", "Carthage", "DerivedData",
     ".pytest_cache", ".mypy_cache", ".gradle", ".cache", ".parcel-cache",
+    "src/hooks", "src/components/ShiftBy",
 }
 
 INCLUDE_EXTS = {
@@ -54,6 +55,15 @@ EXCLUDE_EXTS = {
 
 EXCLUDE_FILES = {
     ".terraform.lock.hcl",
+    ".eslintrc.json",
+    "src/components/ShiftBy/ShiftBy.js",
+    "src/components/ShiftBy/index.js",
+    "package-build-snippet.json",
+    "LICENSE",
+    "src/reset.css",
+    "src/styles.css",
+    ".gitignore",
+    "dotgit--hooks--pre-push"
 }
 
 def read_gitignore_patterns(root):
@@ -79,10 +89,25 @@ def path_matches_any(path, patterns):
 
 def should_ignore_dir(rel_dir, gitignore_patterns):
     name = rel_dir.name
+    full_path = rel_dir.as_posix()
+    
+    print(f"🔍 Checking directory: {full_path} (name: {name})")
+    
+    # Check if the full path matches any of the ignored directories
+    if full_path in DEFAULT_IGNORED_DIRS:
+        print(f"  ✅ Excluded by DEFAULT_IGNORED_DIRS (full path): {full_path}")
+        return True
+    
+    # Check if just the directory name matches (for backward compatibility)
     if name in DEFAULT_IGNORED_DIRS:
+        print(f"  ✅ Excluded by DEFAULT_IGNORED_DIRS (name only): {name}")
         return True
+    
     if path_matches_any(rel_dir, gitignore_patterns):
+        print(f"  ✅ Excluded by gitignore patterns: {name}")
         return True
+    
+    print(f"  ❌ Not excluded: {name}")
     return False
 
 def is_included_file(path, gitignore_patterns):
