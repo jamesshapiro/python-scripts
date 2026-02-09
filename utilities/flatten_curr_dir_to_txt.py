@@ -223,8 +223,48 @@ def main():
     write_output(tree_text, included)
     print(f"Wrote {len(included)} files to {OUTPUT_FILE}")
 
+<<<<<<< HEAD
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
         sys.exit(1)
+=======
+def is_text_file(filename):
+    # Define a set of binary file extensions
+    binary_extensions = {
+        '.png', '.jpg', '.jpeg', '.gif', '.mp4', '.mp3', 
+        '.avi', '.mov', '.mkv', '.flv', '.wmv', '.bmp', 
+        '.tiff', '.ico', '.svg', '.psd', '.raw', '.webp'
+    }
+    # Get the file extension and check if it is in the set of binary extensions
+    _, ext = os.path.splitext(filename)
+    return ext.lower() not in binary_extensions
+
+def crawl_and_print_files(start_path, output_file):
+    output_file_path = os.path.join(start_path, output_file)  # Full path to the output file
+
+    with open(output_file_path, 'w', encoding='utf-8') as f:
+        # Heading for the output
+        f.write("\nBelow is the complete source code for the project:\n")
+        f.write("=" * 49 + "\n")
+
+        for root, dirs, files in os.walk(start_path):
+            # Filter out the output file and binary files
+            files = [file for file in files if os.path.join(root, file) != output_file_path and is_text_file(file)]
+            for file in files:
+                file_path = os.path.join(root, file)
+                f.write(f"\nFile: {file_path}\n\n")
+                f.write("```\n")
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as file_content:
+                        f.write(file_content.read())
+                except Exception as e:
+                    f.write(f"Error reading file {file_path}: {e}\n")
+                f.write("```\n")
+
+        f.write("=" * 49 + "\n")
+
+# Replace '.' with the directory you want to start from
+crawl_and_print_files('.', 'flattened.txt')
+>>>>>>> Add binary file detection to flatten utility, skip non‑text files.
