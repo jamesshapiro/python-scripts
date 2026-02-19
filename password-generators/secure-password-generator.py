@@ -1,24 +1,27 @@
 #!/usr/bin/env python3 -tt
 
-"""Usage:
-  secure-password-generator.py [options]
-
-Options:
-  -h --help            show this help message and exit
-  --nolower            exclude lowercase letters
-  --noupper            exclude uppercase letters
-  --nonumber           exclude numbers
-  --nosymbol           exclude all symbols
-  --nosymbolambi       exclude '{}[]()~,;:.<>'
-  --yesalphaambi       include 'loIO01' (excluded by default)
-  --length LENGTH      password length [default: 16]
-  --numpasswords NUM   number of passwords [default: 1]
-  --annoyingreqs       add 1+ uppercase, lowercase, number, & symbol to password
-"""
+import argparse
 import random
-from docopt import docopt
 
-arguments = docopt(__doc__)
+def parse_args():
+    p = argparse.ArgumentParser(description='Secure password generator')
+    p.add_argument('--nolower', action='store_true', help="exclude lowercase letters")
+    p.add_argument('--noupper', action='store_true', help="exclude uppercase letters")
+    p.add_argument('--nonumber', action='store_true', help="exclude numbers")
+    p.add_argument('--nosymbol', action='store_true', help="exclude all symbols")
+    p.add_argument('--nosymbolambi', action='store_true', help="exclude '{}[]()~,;:.<>'")
+    p.add_argument('--yesalphaambi', action='store_true', help="include 'loIO01' (excluded by default)")
+    p.add_argument('--length', type=int, default=16, metavar='LENGTH', help='password length')
+    p.add_argument('--numpasswords', type=int, default=1, metavar='NUM', help='number of passwords')
+    p.add_argument('--annoyingreqs', action='store_true', help='add 1+ uppercase, lowercase, number, & symbol to password')
+    ns = p.parse_args()
+    return {
+        '--nolower': ns.nolower, '--noupper': ns.noupper, '--nonumber': ns.nonumber,
+        '--nosymbol': ns.nosymbol, '--nosymbolambi': ns.nosymbolambi, '--yesalphaambi': ns.yesalphaambi,
+        '--length': str(ns.length), '--numpasswords': str(ns.numpasswords), '--annoyingreqs': ns.annoyingreqs,
+    }
+
+arguments = parse_args()
     
 lower = 'abcdefghijklmnopqrstuvwxyz'
 upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
